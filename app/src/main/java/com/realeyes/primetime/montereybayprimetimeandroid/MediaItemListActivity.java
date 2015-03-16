@@ -3,6 +3,8 @@ package com.realeyes.primetime.montereybayprimetimeandroid;
 import android.content.Intent;
 import android.os.Bundle;
 import android.app.Activity;
+import android.view.Menu;
+import android.view.MenuInflater;
 
 /**
  * An activity representing a list of MediaItems. This activity
@@ -76,5 +78,12 @@ public class MediaItemListActivity extends Activity
             detailIntent.putExtra(MediaItemDetailFragment.ARG_ITEM_ID, id);
             startActivity(detailIntent);
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.homepage_activity_actions, menu);
+        return super.onCreateOptionsMenu(menu);
     }
 }

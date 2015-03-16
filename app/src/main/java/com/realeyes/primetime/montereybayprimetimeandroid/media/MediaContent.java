@@ -9,6 +9,7 @@ import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
 import com.realeyes.primetime.montereybayprimetimeandroid.utils.HTTPController;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
@@ -22,9 +23,22 @@ import java.util.Map;
  * Helper class for providing media content for user interfaces
  */
 public class MediaContent {
-
-    private static final String mediaUrl = "http://feed.theplatform.com/f/TMCXRC/3oI2GRBlbQ5_";
+    // TODO: uncomment following line when rss feed reflects multiple items
+//    private static final String feedUrl = "http://feed.theplatform.com/f/TMCXRC/3oI2GRBlbQ5_";
+    // TODO: remove following line when rss feed reflects multiple items
+    private static final String feedUrl = "http://office.realeyes.com/jgainfort/PrimetimeData/data.xml";
     private static final String mediaReqTag = "mediaRequest";
+
+    private static final String KEY_RSS = "rss";
+    private static final String KEY_CHANNEL = "channel";
+    private static final String KEY_ITEM = "item";
+
+    private static final String KEY_ITEM_TITLE = "title";
+    private static final String KEY_ITEM_DESCRIPTION = "description";
+    private static final String KEY_ITEM_PUB_DATE = "pubDate";
+    private static final String KEY_ITEM_THUMBNAIL = "media:thumbnail";
+
+    private static final String KEY_THUMBNAIL_URL = "url";
 
     /**
      * An array of media items.
@@ -36,12 +50,9 @@ public class MediaContent {
      */
     public static Map<String, MediaItem> ITEM_MAP = new HashMap<String, MediaItem>();
 
+    // Get media items from RSS Feed
     static {
-//        // Add 3 sample items.
-//        addItem(new MediaItem("Otter Cam", "Monterey Bay Aquarium", "monterey_logo_small", "Watch some cute Otter's"));
-//        addItem(new MediaItem("Shark Cam", "Monterey Bay Aquarium", "monterey_logo_small", "Watch some killer Shark's"));
-//        addItem(new MediaItem("Whale Cam", "Monterey Bay Aquarium", "monterey_logo_small", "Watch some large Whale's"));
-        getMediaItems(mediaUrl, mediaReqTag);
+        getMediaItems(feedUrl, mediaReqTag);
     }
 
     public static void addItem(MediaItem item) {
@@ -54,15 +65,22 @@ public class MediaContent {
      */
     public static class MediaItem {
         public String title;
-        public String author;
-        public String thumbnailName;
+        public String pubDate;
+        public String thumbnailUrl;
         public String description;
 
-        public MediaItem(String title, String author, String thumbnailName, String description) {
-            this.title = title;
-            this.author = author;
-            this.thumbnailName =thumbnailName;
-            this.description = description;
+        public MediaItem(JSONObject item) {
+            try {
+                this.title = item.getString(KEY_ITEM_TITLE);
+                this.description = item.getString(KEY_ITEM_DESCRIPTION);
+                this.pubDate = item.getString(KEY_ITEM_PUB_DATE);
+
+                JSONObject thumbnail = item.getJSONObject(KEY_ITEM_THUMBNAIL);
+                this.thumbnailUrl = thumbnail.getString(KEY_THUMBNAIL_URL);
+            } catch (JSONException e) {
+                Log.e("JSON Exception", e.getMessage());
+                e.printStackTrace();
+            }
         }
 
         @Override
@@ -76,26 +94,21 @@ public class MediaContent {
             @Override
             public void onResponse(String s) {
                 // Convert the String xml response to json
-                String mediaTitle = "";
-                String mediaAuthor ="";
-                String mediaDescription = "";
                 try {
                     JSONObject jsonObj = XML.toJSONObject(s);
-                    JSONObject rss = jsonObj.getJSONObject("rss");
-                    JSONObject channel = rss.getJSONObject("channel");
-                    // TODO: This will eventually be an array of item objects
-                    JSONObject item = channel.getJSONObject("item");
+                    JSONObject rss = jsonObj.getJSONObject(KEY_RSS);
+                    JSONObject channel = rss.getJSONObject(KEY_CHANNEL);
+                    JSONArray items = channel.getJSONArray(KEY_ITEM);
 
-                    mediaTitle = item.getString("title");
-                    mediaAuthor = item.getString("pubDate");
-                    mediaDescription = item.getString("description");
+                    for (int i = 0; i < items.length(); i++) {
+                        JSONObject item = items.getJSONObject(i);
+                        MediaContent.addItem(new MediaContent.MediaItem(item));
+                    }
 
                 } catch (JSONException e) {
                     Log.e("JSON Exception", e.getMessage());
                     e.printStackTrace();
                 }
-
-                MediaContent.addItem(new MediaContent.MediaItem(mediaTitle, mediaAuthor, "monterey_logo_small", mediaDescription));
             }
         },
         new Response.ErrorListener() {

@@ -1,6 +1,7 @@
 package com.realeyes.primetime.montereybayprimetimeandroid;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,7 +10,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import java.util.List;
 
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.NetworkImageView;
 import com.realeyes.primetime.montereybayprimetimeandroid.media.MediaContent;
+import com.realeyes.primetime.montereybayprimetimeandroid.utils.HTTPController;
+
+import org.json.HTTP;
 
 /**
 * Created by JohnGainfort on 3/12/15.
@@ -18,6 +26,8 @@ public class MediaListAdapter extends ArrayAdapter<MediaContent> {
     Context mContext;
     int mLayoutResourceId;
     List mData = null;
+    ImageLoader mImageLoader;
+    NetworkImageView mNetworkImageView;
 
     public MediaListAdapter(Context context, int resource, List data) {
         super(context, resource, data);
@@ -39,7 +49,8 @@ public class MediaListAdapter extends ArrayAdapter<MediaContent> {
             holder = new ViewHolder();
 
             holder.titleView = (TextView) row.findViewById(R.id.mediaTitleText);
-            holder.authorView = (TextView) row.findViewById(R.id.mediaAuthorText);
+            holder.pubDateView = (TextView) row.findViewById(R.id.mediaPubDateText);
+//            holder.thumbnailView = (NetworkImageView) row.findViewById(R.id.mediaThumbnailView);
             holder.thumbnailView = (ImageView) row.findViewById(R.id.mediaThumbnailView);
 
             row.setTag(holder);
@@ -52,10 +63,32 @@ public class MediaListAdapter extends ArrayAdapter<MediaContent> {
         MediaContent.MediaItem media = (MediaContent.MediaItem) mData.get(position);
 
         holder.titleView.setText(media.title);
-        holder.authorView.setText(media.author);
+        holder.pubDateView.setText(media.pubDate);
 
-        int resId = mContext.getResources().getIdentifier(media.thumbnailName, "drawable", mContext.getPackageName());
-        holder.thumbnailView.setImageResource(resId);
+        mImageLoader = HTTPController.getInstance().getImageLoader();
+
+//        mNetworkImageView = (NetworkImageView) holder.thumbnailView;
+//
+//        mNetworkImageView.setImageUrl(media.thumbnailUrl, mImageLoader);
+
+        mImageLoader.get(media.thumbnailUrl, new ImageLoader.ImageListener() {
+            @Override
+            public void onResponse(ImageLoader.ImageContainer imageContainer, boolean b) {
+                if (imageContainer.getBitmap() != null) {
+                    // Load image into imageView
+                    holder.setImageBitmap(imageContainer.getBitmap());
+                }
+            }
+
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                VolleyLog.e("Image Load Error:", volleyError.getMessage());
+            }
+        });
+
+//        int resId = mContext.getResources().getIdentifier(media.thumbnailName, "drawable", mContext.getPackageName());
+//        int resId = mContext.getResources().getIdentifier("monterey_logo_small", "drawable", mContext.getPackageName());
+//        holder.thumbnailView.setImageResource(resId);
 
         // Return row view
         return row;
@@ -63,7 +96,8 @@ public class MediaListAdapter extends ArrayAdapter<MediaContent> {
 
     private static class ViewHolder {
         TextView titleView;
-        TextView authorView;
+        TextView pubDateView;
+//        NetworkImageView thumbnailView;
         ImageView thumbnailView;
     }
 }

@@ -22,14 +22,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
     <TextView
-        android:id="@+id/mediaAuthorText"
+        android:id="@+id/mediaPubDateText"
         android:textColor="#000000"
         android:paddingLeft="10dp"
         android:paddingTop="10dp"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:layout_toRightOf="@+id/mediaThumbnailView"
         android:layout_below="@+id/mediaTitleText"
-        android:text="Author"
+        android:text="Published Date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 </RelativeLayout>
