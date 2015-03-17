@@ -3,8 +3,11 @@ package com.realeyes.primetime.montereybayprimetimeandroid;
 import android.content.Intent;
 import android.os.Bundle;
 import android.app.Activity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.widget.SearchView;
 
 /**
  * An activity representing a list of MediaItems. This activity
@@ -23,13 +26,14 @@ import android.view.MenuInflater;
  * to listen for item selections.
  */
 public class MediaItemListActivity extends Activity
-        implements MediaItemListFragment.Callbacks {
+        implements MediaItemListFragment.Callbacks, SearchView.OnQueryTextListener {
 
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
      * device.
      */
     private boolean mTwoPane;
+    private SearchView mSearchView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +88,35 @@ public class MediaItemListActivity extends Activity
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.homepage_activity_actions, menu);
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+
+        mSearchView = (SearchView) searchItem.getActionView();
+
+        setupSearchView(searchItem);
         return super.onCreateOptionsMenu(menu);
+    }
+
+    private void setupSearchView(MenuItem searchItem) {
+        if (isAlwaysExpanded()) {
+            mSearchView.setIconifiedByDefault(false);
+        } else {
+            searchItem.setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM
+                    | MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
+        }
+
+        mSearchView.setOnQueryTextListener(this);
+    }
+
+    public boolean onQueryTextChange(String newText) {
+        return false;
+    }
+
+    public boolean onQueryTextSubmit(String query) {
+        Log.d("Custom URL", query);
+        return false;
+    }
+
+    protected boolean isAlwaysExpanded() {
+        return false;
     }
 }

@@ -1,7 +1,6 @@
 package com.realeyes.primetime.montereybayprimetimeandroid;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,11 +12,9 @@ import java.util.List;
 import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.NetworkImageView;
 import com.realeyes.primetime.montereybayprimetimeandroid.media.MediaContent;
 import com.realeyes.primetime.montereybayprimetimeandroid.utils.HTTPController;
-
-import org.json.HTTP;
+import com.realeyes.primetime.montereybayprimetimeandroid.media.ViewHolder;
 
 /**
 * Created by JohnGainfort on 3/12/15.
@@ -27,7 +24,7 @@ public class MediaListAdapter extends ArrayAdapter<MediaContent> {
     int mLayoutResourceId;
     List mData = null;
     ImageLoader mImageLoader;
-    NetworkImageView mNetworkImageView;
+    ViewHolder holder = null;
 
     public MediaListAdapter(Context context, int resource, List data) {
         super(context, resource, data);
@@ -39,7 +36,6 @@ public class MediaListAdapter extends ArrayAdapter<MediaContent> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View row = convertView;
-        ViewHolder holder = null;
 
         if (row == null) {
             // Create a new view
@@ -50,7 +46,6 @@ public class MediaListAdapter extends ArrayAdapter<MediaContent> {
 
             holder.titleView = (TextView) row.findViewById(R.id.mediaTitleText);
             holder.pubDateView = (TextView) row.findViewById(R.id.mediaPubDateText);
-//            holder.thumbnailView = (NetworkImageView) row.findViewById(R.id.mediaThumbnailView);
             holder.thumbnailView = (ImageView) row.findViewById(R.id.mediaThumbnailView);
 
             row.setTag(holder);
@@ -67,16 +62,12 @@ public class MediaListAdapter extends ArrayAdapter<MediaContent> {
 
         mImageLoader = HTTPController.getInstance().getImageLoader();
 
-//        mNetworkImageView = (NetworkImageView) holder.thumbnailView;
-//
-//        mNetworkImageView.setImageUrl(media.thumbnailUrl, mImageLoader);
-
         mImageLoader.get(media.thumbnailUrl, new ImageLoader.ImageListener() {
             @Override
             public void onResponse(ImageLoader.ImageContainer imageContainer, boolean b) {
                 if (imageContainer.getBitmap() != null) {
                     // Load image into imageView
-                    holder.setImageBitmap(imageContainer.getBitmap());
+                    holder.thumbnailView.setImageBitmap(imageContainer.getBitmap());
                 }
             }
 
@@ -86,18 +77,7 @@ public class MediaListAdapter extends ArrayAdapter<MediaContent> {
             }
         });
 
-//        int resId = mContext.getResources().getIdentifier(media.thumbnailName, "drawable", mContext.getPackageName());
-//        int resId = mContext.getResources().getIdentifier("monterey_logo_small", "drawable", mContext.getPackageName());
-//        holder.thumbnailView.setImageResource(resId);
-
         // Return row view
         return row;
-    }
-
-    private static class ViewHolder {
-        TextView titleView;
-        TextView pubDateView;
-//        NetworkImageView thumbnailView;
-        ImageView thumbnailView;
     }
 }
